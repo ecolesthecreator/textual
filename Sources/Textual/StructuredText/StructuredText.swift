@@ -104,19 +104,46 @@ import SwiftUI
 public struct StructuredText: View {
   @State private var parseCache = MarkupParseCache()
 
-  private let markup: String
-  private let parser: any MarkupParser
+  private let source: Source
+
+  /// Where the view's content comes from: markup that still needs parsing, or content the
+  /// caller already has.
+  private enum Source {
+    case markup(String, any MarkupParser)
+    case parsed(AttributedString)
+  }
 
   /// Creates a structured-text view by parsing `markup` with a custom parser.
   ///
   /// Use this initializer when you want to provide your own `MarkupParser` implementation.
   public init(_ markup: String, parser: any MarkupParser) {
-    self.markup = markup
-    self.parser = parser
+    self.source = .markup(markup, parser)
+  }
+
+  /// Creates a structured-text view from content you already have.
+  ///
+  /// Parsing is skipped entirely. Use this when the parse belongs somewhere other than the view:
+  /// the parse cache is `@State`, so a row in a lazy container re-parses every time it scrolls
+  /// back into view. Holding the `AttributedString` in your model — built once, off the main
+  /// actor if you like — keeps that cost out of scrolling.
+  ///
+  /// The content is expected to carry the same attributes a ``MarkupParser`` would produce; see
+  /// ``MarkupParser`` for the ones Textual reads.
+  public init(_ attributedString: AttributedString) {
+    self.source = .parsed(attributedString)
+  }
+
+  var content: AttributedString {
+    switch source {
+    case .markup(let markup, let parser):
+      parseCache.attributedString(for: markup, parser: parser)
+    case .parsed(let attributedString):
+      attributedString
+    }
   }
 
   public var body: some View {
-    WithAttachments(parseCache.attributedString(for: markup, parser: parser)) {
+    WithAttachments(content) {
       BlockContent(content: $0)
         .modifier(TextSelectionInteraction())
         .modifier(TextSelectionCoordination())

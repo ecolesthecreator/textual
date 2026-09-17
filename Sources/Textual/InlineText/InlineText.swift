@@ -97,8 +97,14 @@ import SwiftUI
 public struct InlineText: View {
   @State private var parseCache = MarkupParseCache()
 
-  private let markup: String
-  private let parser: any MarkupParser
+  private let source: Source
+
+  /// Where the view's content comes from: markup that still needs parsing, or content the
+  /// caller already has.
+  private enum Source {
+    case markup(String, any MarkupParser)
+    case parsed(AttributedString)
+  }
 
   /// Creates inline text from markup using the given ``MarkupParser`` implementation.
   ///
@@ -106,12 +112,33 @@ public struct InlineText: View {
   ///   - markup: The markup string to parse and display.
   ///   - parser: The parser to use for converting markup to attributed content.
   public init(_ markup: String, parser: any MarkupParser) {
-    self.markup = markup
-    self.parser = parser
+    self.source = .markup(markup, parser)
+  }
+
+  /// Creates inline text from content you already have.
+  ///
+  /// Parsing is skipped entirely. Use this when the parse belongs somewhere other than the view:
+  /// the parse cache is `@State`, so a row in a lazy container re-parses every time it scrolls
+  /// back into view. Holding the `AttributedString` in your model — built once, off the main
+  /// actor if you like — keeps that cost out of scrolling.
+  ///
+  /// The content is expected to carry the same attributes a ``MarkupParser`` would produce; see
+  /// ``MarkupParser`` for the ones Textual reads.
+  public init(_ attributedString: AttributedString) {
+    self.source = .parsed(attributedString)
+  }
+
+  var content: AttributedString {
+    switch source {
+    case .markup(let markup, let parser):
+      parseCache.attributedString(for: markup, parser: parser)
+    case .parsed(let attributedString):
+      attributedString
+    }
   }
 
   public var body: some View {
-    WithAttachments(parseCache.attributedString(for: markup, parser: parser)) {
+    WithAttachments(content) {
       WithInlineStyle($0) {
         TextFragment($0)
           .modifier(TextSelectionInteraction())
