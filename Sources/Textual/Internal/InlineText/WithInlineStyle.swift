@@ -18,6 +18,7 @@ import SwiftUI
 struct WithInlineStyle<Content: View>: View {
   @Environment(\.inlineStyle) private var style
   @Environment(\.textEnvironment) private var environment
+  @Environment(\.softBreakMode) private var softBreakMode
 
   @State private var output: AttributedString?
 
@@ -34,11 +35,12 @@ struct WithInlineStyle<Content: View>: View {
 
   var body: some View {
     content(output ?? AttributedString())
-      .onChange(of: Tuple(input, style, environment), initial: true) { _, newValue in
+      .onChange(of: Tuple(input, style, environment, softBreakMode), initial: true) { _, newValue in
         resolve(
           attributedString: newValue.values.0,
           style: newValue.values.1,
-          in: newValue.values.2
+          in: newValue.values.2,
+          softBreakMode: newValue.values.3
         )
       }
   }
@@ -46,7 +48,8 @@ struct WithInlineStyle<Content: View>: View {
   private func resolve(
     attributedString: AttributedString,
     style: InlineStyle,
-    in environment: TextEnvironmentValues
+    in environment: TextEnvironmentValues,
+    softBreakMode: SoftBreakMode
   ) {
     var output = attributedString
 
@@ -76,6 +79,10 @@ struct WithInlineStyle<Content: View>: View {
       }
 
       output[run.range].mergeAttributes(attributes, mergePolicy: .keepNew)
+    }
+
+    if softBreakMode == .lineBreak {
+      output.renderSoftBreaksAsLineBreaks()
     }
 
     self.output = output

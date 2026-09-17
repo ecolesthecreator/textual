@@ -345,7 +345,10 @@ extension Formatter.InlineNode {
     } else if intent.contains(.lineBreak) {
       node = .lineBreak
     } else if intent.contains(.softBreak) {
-      node = .text(" ")
+      // Export the character the string actually carries. Foundation stores a soft break as a
+      // space, but `.softBreakMode(.lineBreak)` rewrites it to a newline before rendering, and
+      // a copy should match what the reader saw.
+      node = .text(String(attributedString.characters[...]))
     } else if intent.contains(.code) {
       node = .code(String(attributedString.characters[...]))
     } else {

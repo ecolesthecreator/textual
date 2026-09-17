@@ -164,3 +164,33 @@ extension TextualNamespace where Base == NSAttributedString.Key {
     .init(AttributeScopes.FoundationAttributes.PresentationIntentAttribute.name)
   }
 }
+
+// MARK: - Soft breaks
+
+extension AttributedString {
+  /// Rewrites every `softBreak` span to a line break.
+  ///
+  /// Foundation stores a soft break as a single space carrying
+  /// `InlinePresentationIntent.softBreak`, so the substitution is length-preserving and leaves
+  /// every character offset — including the ones the selection layout depends on — untouched.
+  /// Ranges are still replaced back-to-front, because any mutation may invalidate the indices
+  /// that follow it.
+  mutating func renderSoftBreaksAsLineBreaks() {
+    let ranges = runs.compactMap { run -> Range<AttributedString.Index>? in
+      guard run.inlinePresentationIntent?.contains(.softBreak) ?? false else {
+        return nil
+      }
+      return run.range
+    }
+
+    for range in ranges.reversed() {
+      characters.replaceSubrange(range, with: "\n")
+    }
+  }
+
+  func renderingSoftBreaksAsLineBreaks() -> AttributedString {
+    var copy = self
+    copy.renderSoftBreaksAsLineBreaks()
+    return copy
+  }
+}
