@@ -24,7 +24,7 @@ extension Formatter.InlineNode {
     case .link(_, let children):
       return children.renderPlainText()
     case .lineBreak:
-      return " "
+      return "\n"
     case .attachment(let attachment):
       return attachment.description
     }
