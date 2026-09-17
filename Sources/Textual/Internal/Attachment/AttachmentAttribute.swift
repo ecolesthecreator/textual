@@ -24,7 +24,22 @@ struct AttachmentAttribute: TextAttribute {
 }
 
 extension Text.Layout.Run {
-  var attachment: AnyAttachment? {
+  /// The attachment drawn in this run, if any.
+  ///
+  /// Attachment bodies are rasterized into a `Canvas`, so they are never hit-tested. An app that
+  /// needs an inline image to be interactive hosts the control in an overlay instead, and needs to
+  /// know which run holds which attachment in order to place it. Downcast ``AnyAttachment/base``
+  /// to the type your loader returns:
+  ///
+  /// ```swift
+  /// if let image = run.attachment?.base as? NoteImageAttachment {
+  ///   // position a control over run.typographicBounds
+  /// }
+  /// ```
+  ///
+  /// Unlike ``Text/Layout/Run/linkURL``, this needs no change to the markup — the attachment is
+  /// already there.
+  public var attachment: AnyAttachment? {
     self[AttachmentAttribute.self]?.attachment
   }
 

@@ -30,4 +30,5 @@ extension Text.Layout.Run {
   public var linkURL: URL? {
     self[LinkAttribute.self]?.url
   }
+
 }
