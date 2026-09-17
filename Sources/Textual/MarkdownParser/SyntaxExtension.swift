@@ -27,7 +27,10 @@ extension AttributedStringMarkdownParser.SyntaxExtension {
       }
     )
 
-    return Self(cacheKey: "emoji:" + emoji.map(\.shortcode).sorted().joined(separator: ","), patterns: [.emoji]) { token, attributes in
+    return Self(
+      cacheKey: "emoji:" + emoji.map(\.shortcode).sorted().joined(separator: ","),
+      patterns: [.emoji]
+    ) { token, attributes in
       guard let shortcode = token.capturedContent, let emoji = emojiMap[shortcode] else {
         return nil
       }

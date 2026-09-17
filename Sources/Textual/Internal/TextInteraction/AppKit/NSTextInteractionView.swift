@@ -226,7 +226,8 @@
       if !selectionActions.isEmpty {
         contextMenu.addItem(.separator())
         for action in selectionActions {
-          let item = NSMenuItem(title: action.title, action: #selector(performSelectionAction(_:)), keyEquivalent: "")
+          let item = NSMenuItem(
+            title: action.title, action: #selector(performSelectionAction(_:)), keyEquivalent: "")
           item.target = self
           item.representedObject = action
           if let systemImage = action.systemImage {
@@ -292,7 +293,8 @@
       guard window != nil else {
         return
       }
-      outsideClickMonitor = NSEvent.addLocalMonitorForEvents(matching: .leftMouseDown) { [weak self] event in
+      outsideClickMonitor = NSEvent.addLocalMonitorForEvents(matching: .leftMouseDown) {
+        [weak self] event in
         self?.dismissSelection(forClickIn: event)
         return event
       }
@@ -333,7 +335,6 @@
       }
       action.handler(Formatter(model.attributedText(in: selectedRange)).plainText())
     }
-
 
     @objc private func copy(_ sender: Any?) {
       guard let selectedRange = model.selectedRange else {

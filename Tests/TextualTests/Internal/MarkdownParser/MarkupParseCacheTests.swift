@@ -19,8 +19,12 @@ struct MarkupParseCacheTests {
   }
 
   @Test func parsersWithTheSameConfigurationShareAKey() {
-    #expect(AttributedStringMarkdownParser.markdown().cacheKey == AttributedStringMarkdownParser.markdown().cacheKey)
-    #expect(AttributedStringMarkdownParser.markdown().cacheKey != AttributedStringMarkdownParser.inlineMarkdown().cacheKey)
+    #expect(
+      AttributedStringMarkdownParser.markdown().cacheKey
+        == AttributedStringMarkdownParser.markdown().cacheKey)
+    #expect(
+      AttributedStringMarkdownParser.markdown().cacheKey
+        != AttributedStringMarkdownParser.inlineMarkdown().cacheKey)
     #expect(
       AttributedStringMarkdownParser.markdown(syntaxExtensions: [.math]).cacheKey
         != AttributedStringMarkdownParser.markdown().cacheKey

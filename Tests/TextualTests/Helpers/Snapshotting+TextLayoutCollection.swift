@@ -10,24 +10,25 @@
       // Named first: chained directly, the compiler picks the `json(_:)` overload and finds no `asyncPullback`.
       let json: Snapshotting<CodableTextLayoutCollection, String> = .json
       return json.asyncPullback { (view: Value) -> Async<CodableTextLayoutCollection> in
-          // Capture layout from view
-          var capturedLayoutCollection: (any TextLayoutCollection)?
-          let viewWithCapture = view.overlayTextLayoutCollection(size: config.size ?? .zero) { layoutCollection in
-            capturedLayoutCollection = layoutCollection
-            return Color.clear
-          }
-
-          // Use image strategy to render and trigger layout capture
-          let imageStrategy = Snapshotting<AnyView, UIImage>.image(layout: .device(config: config))
-          let asyncImage = imageStrategy.snapshot(AnyView(viewWithCapture))
-
-          return asyncImage.map { _ in
-            guard let capturedLayoutCollection else {
-              preconditionFailure("Failed to capture layout data")
-            }
-            return CodableTextLayoutCollection(capturedLayoutCollection)
-          }
+        // Capture layout from view
+        var capturedLayoutCollection: (any TextLayoutCollection)?
+        let viewWithCapture = view.overlayTextLayoutCollection(size: config.size ?? .zero) {
+          layoutCollection in
+          capturedLayoutCollection = layoutCollection
+          return Color.clear
         }
+
+        // Use image strategy to render and trigger layout capture
+        let imageStrategy = Snapshotting<AnyView, UIImage>.image(layout: .device(config: config))
+        let asyncImage = imageStrategy.snapshot(AnyView(viewWithCapture))
+
+        return asyncImage.map { _ in
+          guard let capturedLayoutCollection else {
+            preconditionFailure("Failed to capture layout data")
+          }
+          return CodableTextLayoutCollection(capturedLayoutCollection)
+        }
+      }
     }
   }
 #endif

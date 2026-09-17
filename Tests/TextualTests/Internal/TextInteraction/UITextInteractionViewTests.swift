@@ -7,9 +7,12 @@
 
   @MainActor
   struct UITextInteractionViewTests {
-    private func makeSelectedView() throws -> (window: UIWindow, view: UITextInteractionView, model: TextSelectionModel) {
+    private func makeSelectedView() throws -> (
+      window: UIWindow, view: UITextInteractionView, model: TextSelectionModel
+    ) {
       let model = try TextSelectionModel(fixtureName: "two-paragraphs-bidi")
-      let view = UITextInteractionView(model: model, exclusionRects: [], openURL: OpenURLAction { _ in .handled })
+      let view = UITextInteractionView(
+        model: model, exclusionRects: [], openURL: OpenURLAction { _ in .handled })
       view.frame = CGRect(x: 0, y: 0, width: 320, height: 120)
       let window = UIWindow(frame: CGRect(x: 0, y: 0, width: 320, height: 480))
       window.addSubview(view)
