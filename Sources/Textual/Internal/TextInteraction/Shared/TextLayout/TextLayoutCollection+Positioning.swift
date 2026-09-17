@@ -14,7 +14,8 @@
           }
         }
       }
-      return TextPosition(indexPath: .init(runSlice: 0, run: 0, line: 0, layout: 0), affinity: .upstream)
+      return TextPosition(
+        indexPath: .init(runSlice: 0, run: 0, line: 0, layout: 0), affinity: .upstream)
     }
 
     var endPosition: TextPosition {
@@ -22,7 +23,9 @@
         for (lineIndex, line) in layout.lines.enumerated().reversed() {
           for (runIndex, run) in line.runs.enumerated().reversed() where !run.slices.isEmpty {
             return TextPosition(
-              indexPath: .init(runSlice: run.slices.endIndex - 1, run: runIndex, line: lineIndex, layout: layoutIndex),
+              indexPath: .init(
+                runSlice: run.slices.endIndex - 1, run: runIndex, line: lineIndex,
+                layout: layoutIndex),
               affinity: .upstream
             )
           }
@@ -127,6 +130,14 @@
     }
 
     func position(at layoutIndex: Int, localCharacterIndex: Int) -> TextPosition? {
+      // `reconcilePosition` feeds this an index path taken from a *different*
+      // collection, so `layoutIndex` can outlive the layouts it was minted
+      // against. `contains(_:)` guards the positions UIKit hands back, but not
+      // this path — the unguarded `layouts[layoutIndex]` below is still a trap.
+      guard layouts.indices.contains(layoutIndex) else {
+        return nil
+      }
+
       guard localCharacterIndex > 0 else {
         return TextPosition(
           indexPath: .init(layout: layoutIndex),

@@ -90,13 +90,30 @@
       // Get the offset mappings on the layout strings to maintain object identity
       let (_, characterOffsets) = contents.layoutAttributedStrings.joined()
 
-      return zip(base, contents.lineFragments).compactMap { line, lineFragment in
+      let mapped = zip(base, contents.lineFragments).map { line, lineFragment -> (any TextLine)? in
         guard let offset = characterOffsets[.init(lineFragment.attributedString)] else {
           return nil
         }
 
         return LiveTextLine(base: line, offset: offset)
       }
+
+      // A `compactMap` here drops the fragments the identity map missed, which
+      // yields a `.lines` shorter than `base` — and when every fragment misses,
+      // an empty `.lines`, leaving the layout present but unselectable. The
+      // miss is reliable for custom block styles that wrap `configuration.label`
+      // (code block / blockquote styles with a header row), because the extra
+      // decoration layer breaks the attributed-string identity round-trip
+      // through `contents.layoutAttributedStrings.joined()`.
+      //
+      // Fall back to an offset-0 line list built from `base`. Selection stays
+      // valid within the layout; we only lose the multi-fragment character
+      // offset math, which is the right trade against a silently dead surface.
+      if mapped.contains(where: { $0 == nil }) {
+        return base.map { LiveTextLine(base: $0) }
+      }
+
+      return mapped.compactMap { $0 }
     }
   }
 
