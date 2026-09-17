@@ -10,28 +10,29 @@ extension StructuredText {
       self.content = content
     }
 
-    /// Copies the code block contents to the system pasteboard.
+    /// The code block contents as plain text.
     ///
-    /// Textual writes both a plain-text and an HTML representation when possible.
+    /// Unlike ``StructuredText/BlockProxy/plainText``, this is *not* dedented: leading
+    /// whitespace is part of the code, and stripping the indentation shared by every line would
+    /// silently reformat it.
+    public var plainText: String {
+      Formatter(AttributedString(content)).plainText()
+    }
+
+    /// Copies the code block contents to the system pasteboard as plain text.
+    ///
+    /// Only a plain-text flavor is written. Code pasted into a rich-text target should arrive as
+    /// source, not as the syntax-highlighted colors and fonts it happened to be rendered with.
     @available(tvOS, unavailable)
     @available(watchOS, unavailable)
     public func copyToPasteboard() {
       #if TEXTUAL_ENABLE_TEXT_SELECTION && canImport(AppKit) && !targetEnvironment(macCatalyst)
         let pasteboard = NSPasteboard.general
         pasteboard.clearContents()
-
-        let formatter = Formatter(AttributedString(content))
-        pasteboard.setString(formatter.plainText(), forType: .string)
-        pasteboard.setString(formatter.html(), forType: .html)
+        pasteboard.setString(plainText, forType: .string)
       #elseif TEXTUAL_ENABLE_TEXT_SELECTION && canImport(UIKit)
-        let formatter = Formatter(AttributedString(content))
         UIPasteboard.general.setItems(
-          [
-            [
-              UTType.plainText.identifier: formatter.plainText(),
-              UTType.html.identifier: formatter.html(),
-            ]
-          ]
+          [[UTType.plainText.identifier: plainText]]
         )
       #endif
     }
