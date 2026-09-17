@@ -3,6 +3,7 @@ import SwiftUI
 extension StructuredText {
   struct BlockQuote: View {
     @Environment(\.blockQuoteStyle) private var blockQuoteStyle
+    @Environment(\.softBreakMode) private var softBreakMode
 
     private let intent: PresentationIntent.IntentType?
     private let content: AttributedSubstring
@@ -20,7 +21,8 @@ extension StructuredText {
             content: content
           )
         ),
-        indentationLevel: indentationLevel
+        indentationLevel: indentationLevel,
+        block: BlockProxy(content, softBreakMode: softBreakMode)
       )
       let resolvedStyle = blockQuoteStyle.resolve(configuration: configuration)
 

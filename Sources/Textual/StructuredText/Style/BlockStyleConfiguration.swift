@@ -15,5 +15,15 @@ extension StructuredText {
     public let label: Label
     /// The indentation level of the block within the document structure.
     public let indentationLevel: Int
+    /// A proxy that provides block actions, for blocks that carry text content.
+    ///
+    /// `nil` for blocks with no text of their own, such as a thematic break.
+    public let block: BlockProxy?
+
+    init(label: Label, indentationLevel: Int, block: BlockProxy? = nil) {
+      self.label = label
+      self.indentationLevel = indentationLevel
+      self.block = block
+    }
   }
 }

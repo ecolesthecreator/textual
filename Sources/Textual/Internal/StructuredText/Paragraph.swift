@@ -3,6 +3,7 @@ import SwiftUI
 extension StructuredText {
   struct Paragraph: View {
     @Environment(\.paragraphStyle) private var paragraphStyle
+    @Environment(\.softBreakMode) private var softBreakMode
 
     private let content: AttributedSubstring
 
@@ -13,7 +14,8 @@ extension StructuredText {
     var body: some View {
       let configuration = BlockStyleConfiguration(
         label: .init(label),
-        indentationLevel: indentationLevel
+        indentationLevel: indentationLevel,
+        block: BlockProxy(content, softBreakMode: softBreakMode)
       )
       let resolvedStyle = paragraphStyle.resolve(configuration: configuration)
 
