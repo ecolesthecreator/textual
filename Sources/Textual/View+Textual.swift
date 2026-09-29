@@ -257,6 +257,14 @@ extension TextualNamespace where Base: View {
     base.environment(\.unorderedListMarker, unorderedListMarker)
   }
 
+  /// Sets the marker drawn in place of the bullet for task-list items (`- [ ]`, `- [x]`).
+  @inlinable
+  public func taskListMarker(
+    _ taskListMarker: some StructuredText.TaskListMarker
+  ) -> some View {
+    base.environment(\.taskListMarker, taskListMarker)
+  }
+
   /// Sets the thematic break style used by ``StructuredText``.
   @inlinable
   public func thematicBreakStyle(
